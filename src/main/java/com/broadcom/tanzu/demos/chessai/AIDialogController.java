@@ -90,11 +90,8 @@ class AIDialogController {
         // Build the prompt.
         final var prompt = new StringBuilder("""
                 Process this question from the player (using Markdown only for formatting):
-                
+
                 <question>{question}</question>
-                
-                Answer using the language used to ask the question.
-                For example: if the question is in French, answer in French.
                 """.trim());
         final var convEntries = redis.opsForList().range("chess::" + boardId + "::conversation", 0, -1);
         if (convEntries != null && !convEntries.isEmpty()) {
