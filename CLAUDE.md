@@ -9,7 +9,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./mvnw clean package
 
 # Run with a specific AI profile (e.g. claude, mistralai, openai, gemma, llama, deepseek)
-./mvnw spring-boot:run -Dspring-boot.run.profiles=claude
+# Load API keys from .env first
+export $(grep -v '^#' .env | xargs) && ./mvnw spring-boot:run -Dspring-boot.run.profiles=openai
 
 # Run tests
 ./mvnw -B test
@@ -32,7 +33,7 @@ Set the API key for the chosen profile before running:
 
 ## Architecture
 
-This is a Spring Boot 3.4.3 / Java 21 web app where users play chess against an LLM, assisted by an optional chess engine.
+This is a Spring Boot 4.0.4 / Java 21 web app where users play chess against an LLM, assisted by an optional chess engine.
 
 **Request flow:**
 1. Browser sends moves via REST (HTMX) and receives real-time board updates over WebSocket (SockJS + STOMP).
@@ -42,7 +43,7 @@ This is a Spring Boot 3.4.3 / Java 21 web app where users play chess against an 
 5. `ChessEngine` (pluggable interface) validates/suggests moves independently of the LLM. Implementations live in `impl/stockfishonline/`, `impl/chessapi/`, `impl/noop/`.
 6. `Board` (a record) is the central game state object, persisted in Redis via `BoardRepository`.
 
-**AI profiles** are Spring profiles — each profile has its own `application-<profile>.properties` file that activates a specific Spring AI starter and excludes others to avoid bean conflicts.
+**AI profiles** are Spring profiles — each profile has its own `application-<profile>.properties` file that sets `spring.ai.model.chat=<provider>` to activate the right chat model. All other model types (embedding, image, etc.) are disabled globally in `application.properties`.
 
 **System prompt** is in `src/main/resources/system-message.st` (StringTemplate format). Edit this to change how the AI approaches the game.
 
